@@ -171,6 +171,10 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 	const [menu, setMenu] = useState<MenuState>(initialMenu);
 	const [isRO, setIsRO] = useState(!!readOnlyProp);
 
+	if (!onChange && !isRO) {
+		throw new Error("The 'onChange' prop is required when not in read-only mode.");
+	}
+
 	// Expose l'API impérative
 	useImperativeHandle(
 		ref,
@@ -263,7 +267,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 			: before.length + insert.length - (selectEndOffset ?? 0);
 
 		setInternal(next);
-		onChange(next);
+		onChange!(next);
 		requestAnimationFrame(() => {
 			el.focus();
 			el.selectionStart = caretStart;
@@ -341,7 +345,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 				const after = value.slice(selectionEnd);
 				const next = before + open + selected + close + after;
 				setInternal(next);
-				onChange(next);
+				onChange!(next);
 				requestAnimationFrame(() => {
 					const start = before.length + 1;
 					const end = start + selected.length;
@@ -399,7 +403,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 				const after = el.value.slice(el.selectionStart);
 				const next = before + choice + after;
 				setInternal(next);
-				onChange(next);
+				onChange!(next);
 				const newCaret = before.length + choice.length;
 				requestAnimationFrame(() => {
 					el.selectionStart = newCaret;
@@ -431,7 +435,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 						value.slice(0, startLine) + indented + value.slice(selectionEnd);
 					const delta = indent.length * lines.length;
 					setInternal(next);
-					onChange(next);
+					onChange!(next);
 					requestAnimationFrame(() => {
 						el.selectionStart = selectionStart + indent.length;
 						el.selectionEnd = selectionEnd + delta;
@@ -448,7 +452,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 					const next =
 						value.slice(0, startLine) + outdented + value.slice(selectionEnd);
 					setInternal(next);
-					onChange(next);
+					onChange!(next);
 					requestAnimationFrame(() => {
 						el.selectionStart = Math.max(
 							startLine,
@@ -503,7 +507,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 					const nextValue = before + insert + after;
 					const caretOffset = ("\n" + indent + INDENT_UNIT).length; // position dans insert
 					setInternal(nextValue);
-					onChange(nextValue);
+					onChange!(nextValue);
 
 					requestAnimationFrame(() => {
 						const newPos = before.length + caretOffset;
@@ -576,7 +580,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 							// en readOnly, la value ne change pas, mais on laisse l’event pour compat
 							if (isRO) return;
 							setInternal(e.target.value);
-							onChange(e.target.value);
+							onChange!(e.target.value);
 							handleInput(e);
 						}}
 						onKeyDown={handleKeyDown}
@@ -614,7 +618,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 									const after = el.value.slice(el.selectionStart);
 									const next = before + item + after;
 									setInternal(next);
-									onChange(next);
+									onChange!(next);
 									const newCaret = before.length + item.length;
 									requestAnimationFrame(() => {
 										el.focus();

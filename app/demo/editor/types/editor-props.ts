@@ -9,7 +9,7 @@ interface Theme {
 
 interface EditorProps {
 	value: string;
-	onChange: (newValue: string) => void;
+	onChange?: (newValue: string) => void;
 	language?: string;
 	theme: Theme | string;
 	numberOfLines?: boolean;

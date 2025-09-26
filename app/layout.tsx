@@ -1,34 +1,31 @@
+import type React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "React Code Editor",
-  description: "a React code editor component with syntax highlighting",
+	title: "React Code Editor - @flexreasonabilty/react-code-editor",
+	description:
+		"A modern, customizable React code editor component with syntax highlighting and dark theme support",
+	generator: "v0.app",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" className="dark">
+			<body
+				className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}
+			>
+				<Suspense>
+					{children}
+				</Suspense>
+			</body>
+		</html>
+	);
 }
