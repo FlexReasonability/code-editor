@@ -1,0 +1,13 @@
+{
+	"name": "@flexreasonability/editor",
+	"version": "0.1.0",
+	"description": "Lightweight code editor component and syntax highlighter (TS source) exported as a local module.",
+	"author": "FlexReasonability",
+	"license": "MIT",
+	"main": "index.ts",
+	"types": "types/editor-props.ts",
+	"files": [
+		"**/*"
+	],
+	"sideEffects": false
+}

@@ -1,0 +1,133 @@
+/* src/editor/editor.css — scroll UNIQUEMENT sur la root, layout grid sans sync */
+
+.editor-root {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	overflow: auto; /* ✅ Le scroll est ici */
+}
+
+.editor-surface {
+	position: relative;
+	display: grid;
+	grid-template-columns: 56px 1fr; /* 56px = 48px gutter + 8px padding interne */
+	align-items: start;
+	min-width: 0;
+}
+
+/* Gutter */
+.editor-gutter {
+	user-select: none;
+	text-align: right;
+	padding-inline-end: 8px;
+	padding-block-start: 12px;
+	opacity: 0.6;
+}
+.editor-gutter-inner {
+	padding-inline: 8px;
+}
+
+/* Colonne contenu */
+.editor-pane {
+	position: relative; /* pour ancrer le textarea de façon normale (pas absolute) */
+}
+
+/* Textarea : pas de scroll interne, il grandit, le scroll est porté par .editor-root */
+.editor-textarea {
+	width: 100%;
+	border: 0;
+	outline: none;
+	background: transparent;
+	resize: none;
+	overflow: hidden; /* ✅ pas de scroll interne */
+	white-space: pre;
+	padding: 12px;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+/* Menu d'autocomplétion, absolu dans .editor-surface (défile naturellement avec la root) */
+.completion-menu {
+	position: absolute;
+	min-width: 220px;
+	max-height: 240px;
+	overflow: auto;
+	background: #1e1e1e;
+	color: #d4d4d4;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	border-radius: 6px;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+	z-index: 30;
+	padding: 4px;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+.completion-item {
+	padding: 4px 8px;
+	border-radius: 4px;
+	cursor: default;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.completion-item.is-active {
+	background: #2a2d2e;
+	color: #fff;
+}
+
+/* (Optionnel) coin dégradé si tu veux le garder — place-le si nécessaire dans .editor-surface */
+.editor-corner-fade {
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 32px;
+	width: 96px;
+	background: linear-gradient(270deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0));
+	mix-blend-mode: multiply;
+}
+
+/* superposition highlight/textarea */
+.editor-pane {
+  position: relative;
+}
+
+/* Couche de rendu des tokens (derrière la textarea) */
+.editor-highlight {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* La textarea affiche le caret mais pas le texte (visible via la couche highlight) */
+.editor-text-transparent {
+  color: transparent;
+  background: transparent;
+  /* Pour WebKit, assure la transparence du texte */
+  -webkit-text-fill-color: transparent;
+}
+
+/* Styles des tokens via variables CSS (thème) */
+.tok { color: inherit; }
+.tok-keyword     { color: var(--tok-keyword, #c586c0); }
+.tok-comment     { color: var(--tok-comment, #6a9955); }
+.tok-string      { color: var(--tok-string, #ce9178); }
+.tok-number      { color: var(--tok-number, #b5cea8); }
+.tok-boolean     { color: var(--tok-boolean, #569cd6); }
+.tok-null        { color: var(--tok-null, #569cd6); }
+.tok-regex       { color: var(--tok-regex, #d16969); }
+.tok-function    { color: var(--tok-function, #dcdcaa); }
+.tok-variable    { color: var(--tok-variable, #9cdcfe); }
+.tok-property    { color: var(--tok-property, #9cdcfe); }
+.tok-operator    { color: var(--tok-operator, #d4d4d4); }
+.tok-punctuation { color: var(--tok-punctuation, #d4d4d4); }
+.tok-type        { color: var(--tok-type, #4ec9b0); }

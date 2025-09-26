@@ -1,0 +1,60 @@
+// src/highlight/languages/python.ts
+import type { Language } from "../types";
+
+const keywords = [
+	"and",
+	"as",
+	"assert",
+	"break",
+	"class",
+	"continue",
+	"def",
+	"del",
+	"elif",
+	"else",
+	"except",
+	"False",
+	"finally",
+	"for",
+	"from",
+	"global",
+	"if",
+	"import",
+	"in",
+	"is",
+	"lambda",
+	"None",
+	"nonlocal",
+	"not",
+	"or",
+	"pass",
+	"raise",
+	"return",
+	"True",
+	"try",
+	"while",
+	"with",
+	"yield",
+];
+const kwRe = new RegExp(`\\b(?:${keywords.join("|")})\\b`, "g");
+
+export const pythonLanguage: Language = {
+	id: "python",
+	name: "Python",
+	rules: [
+		{ pattern: /#[^\n]*/g, type: "comment", priority: 0 },
+		{ pattern: /'''[\s\S]*?'''/g, type: "string", priority: 1 },
+		{ pattern: /"""[\s\S]*?"""/g, type: "string", priority: 1 },
+		{ pattern: /'(?:\\.|[^'\\])*'/g, type: "string", priority: 1 },
+		{ pattern: /"(?:\\.|[^"\\])*"/g, type: "string", priority: 1 },
+		{
+			pattern: /\b(?:\d+(\.\d+)?([eE][+-]?\d+)?)\b/g,
+			type: "number",
+			priority: 2,
+		},
+		{ pattern: kwRe, type: "keyword", priority: 3 },
+		{ pattern: /\b([A-Za-z_]\w*)(?=\s*\()/g, type: "function", priority: 4 },
+		{ pattern: /[+\-/*%=!<>|&^~?:]+/g, type: "operator", priority: 5 },
+		{ pattern: /[{}()[\].,;]/g, type: "punctuation", priority: 6 },
+	],
+};
