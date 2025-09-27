@@ -1,9 +1,10 @@
-// src/highlight/types.ts
+// src/highlight/types.ts — ajoute la priorité sur les tokens
 export type TokenType =
 	| "comment"
 	| "string"
 	| "number"
 	| "keyword"
+	| "keywordDecl"
 	| "boolean"
 	| "null"
 	| "regex"
@@ -12,19 +13,30 @@ export type TokenType =
 	| "function"
 	| "variable"
 	| "property"
-	| "type";
+	| "type"
+	| "jsxTag"
+	| "jsxTagComponent"
+	| "jsxAttr"
+	| "jsxText"
+	| "jsxBracket"
+	| "bracket0"
+	| "bracket1"
+	| "bracket2"
+	| "bracketUnmatched"
+	| "bracketActive";
 
 export interface Token {
-	start: number; // inclusive
-	end: number; // exclusive
+	start: number;
+	end: number;
 	type: TokenType;
+	/** priorité effective (plus grand = prime) */
+	prio?: number;
 }
 
 export interface Rule {
-	/** Global regex (avec le flag /g !) */
 	pattern: RegExp;
 	type: TokenType;
-	/** Priorité: plus petit = appliqué en premier (par défaut: index d'insertion) */
+	/** priorité suggérée par la règle (facultatif) */
 	priority?: number;
 }
 

@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Github, Terminal, Code, Zap, Palette } from "lucide-react";
-import  Editor  from "./editor/editor";
+import Editor from "./editor/editor";
 
 const codeExample = `import { useState } from "react";
-import Editor from "@flexreasonabilty/react-code-editor";
+import Editor from "light-code-editor";
 
 const Page = () => {
   const [value, setValue] = useState("");
@@ -45,7 +45,7 @@ export default function HomePage() {
 									react-code-editor
 								</h1>
 								<p className="text-xs text-muted-foreground">
-									@flexreasonabilty
+									@flexreasonability
 								</p>
 							</div>
 						</div>
@@ -80,13 +80,13 @@ export default function HomePage() {
 					</Badge>
 
 					<h1 className="text-5xl md:text-6xl font-bold text-balance mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-						The Modern React Code Editor
+						Light Code Editor
 					</h1>
 
 					<p className="text-xl text-muted-foreground text-balance mb-12 leading-relaxed">
-						A powerful, customizable code editor component for React
-						applications. Built with modern web technologies and designed for
-						developers who value simplicity and performance.
+						A lightweight, modular client-side code editor component for React.
+						Runs entirely in the browser and is designed to be embedded as a
+						focused UI building block in client applications.
 					</p>
 
 					{/* Installation */}
@@ -103,9 +103,7 @@ export default function HomePage() {
 									variant="ghost"
 									size="sm"
 									onClick={() =>
-										copyToClipboard(
-											"npm install @flexreasonabilty/react-code-editor"
-										)
+										copyToClipboard("npm install light-code-editor")
 									}
 									className="gap-2"
 								>
@@ -114,7 +112,7 @@ export default function HomePage() {
 								</Button>
 							</div>
 							<code className="font-mono text-sm text-foreground block bg-accent/50 p-3 rounded border">
-								npm install @flexreasonabilty/react-code-editor
+								npm install light-code-editor
 							</code>
 						</div>
 					</div>
@@ -151,8 +149,9 @@ export default function HomePage() {
 							Simple to Use, Powerful by Design
 						</h2>
 						<p className="text-lg text-muted-foreground text-balance">
-							Get started with just a few lines of code. Full TypeScript support
-							included.
+							Embed a small, well-typed editor in your client app with a few
+							lines of code — optimized for modular usage and fast client-side
+							rendering.
 						</p>
 					</div>
 
@@ -171,9 +170,7 @@ export default function HomePage() {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() =>
-									copyToClipboard(codeExample)
-								}
+								onClick={() => copyToClipboard(codeExample)}
 								className="gap-2"
 							>
 								<Copy className="w-3 h-3" />
@@ -208,8 +205,8 @@ export default function HomePage() {
 								Syntax Highlighting
 							</h3>
 							<p className="text-muted-foreground leading-relaxed">
-								Built-in syntax highlighting for JavaScript, TypeScript, and
-								many other languages.
+								Built-in, zero-dependency syntax highlighting that runs on the
+								client for common languages like JavaScript and Python.
 							</p>
 						</Card>
 
@@ -219,8 +216,8 @@ export default function HomePage() {
 							</div>
 							<h3 className="text-xl font-semibold mb-3">Dark Theme</h3>
 							<p className="text-muted-foreground leading-relaxed">
-								Beautiful dark theme that's easy on the eyes and perfect for
-								modern applications.
+								Beautiful dark theme that's easy on the eyes and ideal for
+								embedded developer UIs.
 							</p>
 						</Card>
 
@@ -247,9 +244,7 @@ export default function HomePage() {
 								<Code className="w-4 h-4 text-primary-foreground" />
 							</div>
 							<div>
-								<p className="font-mono font-semibold">
-									@flexreasonabilty/react-code-editor
-								</p>
+								<p className="font-mono font-semibold">light-code-editor</p>
 								<p className="text-sm text-muted-foreground">
 									Modern React Code Editor
 								</p>

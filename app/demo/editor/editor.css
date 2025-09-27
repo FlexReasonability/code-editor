@@ -91,43 +91,116 @@
 
 /* superposition highlight/textarea */
 .editor-pane {
-  position: relative;
+	position: relative;
 }
 
 /* Couche de rendu des tokens (derrière la textarea) */
 .editor-highlight {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  pointer-events: none;
-  user-select: none;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background: transparent;
-  font-family: inherit;
-  font-size: inherit;
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	pointer-events: none;
+	user-select: none;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	background: transparent;
+	font-family: inherit;
+	font-size: inherit;
 }
 
 /* La textarea affiche le caret mais pas le texte (visible via la couche highlight) */
 .editor-text-transparent {
-  color: transparent;
-  background: transparent;
-  /* Pour WebKit, assure la transparence du texte */
-  -webkit-text-fill-color: transparent;
+	color: transparent;
+	background: transparent;
+	/* Pour WebKit, assure la transparence du texte */
+	-webkit-text-fill-color: transparent;
 }
 
 /* Styles des tokens via variables CSS (thème) */
-.tok { color: inherit; }
-.tok-keyword     { color: var(--tok-keyword, #c586c0); }
-.tok-comment     { color: var(--tok-comment, #6a9955); }
-.tok-string      { color: var(--tok-string, #ce9178); }
-.tok-number      { color: var(--tok-number, #b5cea8); }
-.tok-boolean     { color: var(--tok-boolean, #569cd6); }
-.tok-null        { color: var(--tok-null, #569cd6); }
-.tok-regex       { color: var(--tok-regex, #d16969); }
-.tok-function    { color: var(--tok-function, #dcdcaa); }
-.tok-variable    { color: var(--tok-variable, #9cdcfe); }
-.tok-property    { color: var(--tok-property, #9cdcfe); }
-.tok-operator    { color: var(--tok-operator, #d4d4d4); }
-.tok-punctuation { color: var(--tok-punctuation, #d4d4d4); }
-.tok-type        { color: var(--tok-type, #4ec9b0); }
+.tok {
+	color: inherit;
+}
+.tok-keyword {
+	color: var(--tok-keyword, #c586c0);
+}
+.tok-comment {
+	color: var(--tok-comment, #6a9955);
+}
+.tok-string {
+	color: var(--tok-string, #ce9178);
+}
+.tok-number {
+	color: var(--tok-number, #b5cea8);
+}
+.tok-boolean {
+	color: var(--tok-boolean, #569cd6);
+}
+.tok-null {
+	color: var(--tok-null, #569cd6);
+}
+.tok-regex {
+	color: var(--tok-regex, #d16969);
+}
+.tok-function {
+	color: var(--tok-function, #dcdcaa);
+}
+.tok-variable {
+	color: var(--tok-variable, #9cdcfe);
+}
+.tok-property {
+	color: var(--tok-property, #9cdcfe);
+}
+.tok-operator {
+	color: var(--tok-operator, #d4d4d4);
+}
+.tok-punctuation {
+	color: var(--tok-punctuation, #d4d4d4);
+}
+.tok-type {
+	color: var(--tok-type, #4ec9b0);
+}
+/* src/editor/editor.css — classes CSS des nouveaux tokens */
+.tok-keywordDecl {
+	color: var(--tok-keywordDecl, #569cd6);
+}
+.tok-jsxTag {
+	color: var(--tok-jsxTag, #569cd6);
+}
+.tok-jsxAttr {
+	color: var(--tok-jsxAttr, #9cdcfe);
+}
+.tok-jsxText {
+	color: var(--tok-jsxText, #d4d4d4);
+}
+/* src/editor/editor.css — style du nouveau token */
+.tok-jsxTagComponent {
+	color: var(--tok-jsxTagComponent, #4ec9b0);
+}
+.tok-jsxBracket {
+	color: var(--tok-jsxBracket, #808080);
+}
+
+/* src/editor/editor.css — seulement 3 classes de bracket */
+.tok-bracket0 {
+	color: var(--tok-bracket0, #61afef);
+}
+.tok-bracket1 {
+	color: var(--tok-bracket1, #e5c07b);
+}
+.tok-bracket2 {
+	color: var(--tok-bracket2, #c678dd);
+}
+
+.tok-bracketUnmatched {
+	color: var(--tok-bracketUnmatched, #ff6b6b);
+	font-weight: 700;
+	text-decoration: underline;
+}
+
+.tok-bracketActive {
+	color: var(--tok-bracketActive, #ffffff);
+	background: rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: 2px;
+	padding: 0 1px;
+}

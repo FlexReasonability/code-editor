@@ -1,4 +1,4 @@
-// src/highlight/languages/javascript.ts
+// src/highlight/languages/javascript.ts — sépare balises HTML vs composants JSX
 import type { Language } from "../types";
 
 const keywords = [
@@ -6,7 +6,6 @@ const keywords = [
 	"case",
 	"catch",
 	"class",
-	"const",
 	"continue",
 	"debugger",
 	"default",
@@ -16,26 +15,20 @@ const keywords = [
 	"enum",
 	"export",
 	"extends",
-	"false",
 	"finally",
 	"for",
-	"function",
 	"if",
 	"import",
 	"in",
 	"instanceof",
-	"let",
 	"new",
-	"null",
 	"return",
 	"super",
 	"switch",
 	"this",
 	"throw",
-	"true",
 	"try",
 	"typeof",
-	"var",
 	"void",
 	"while",
 	"with",
@@ -43,53 +36,75 @@ const keywords = [
 	"async",
 	"await",
 ];
-const kwRe = new RegExp(`\\b(?:${keywords.join("|")})\\b`, "g");
+const declKeywords = ["const", "let", "var", "function", "=>", "true"];
 
-// Rem: on reste simple (pas de nested template, ni heuristiques avancées)
+const kwRe = new RegExp(`\\b(?:${keywords.join("|")})\\b`, "g");
+const kwDeclRe = new RegExp(`\\b(?:${declKeywords.join("|")})\\b`, "g");
+
 export const javascriptLanguage: Language = {
 	id: "javascript",
-	name: "JavaScript",
+	name: "JavaScript / JSX",
 	rules: [
-		// commentaires
 		{ pattern: /\/\/[^\n]*/g, type: "comment", priority: 0 },
 		{ pattern: /\/\*[\s\S]*?\*\//g, type: "comment", priority: 0 },
 
-		// strings / template
 		{ pattern: /'(?:\\.|[^'\\])*'/g, type: "string", priority: 1 },
 		{ pattern: /"(?:\\.|[^"\\])*"/g, type: "string", priority: 1 },
 		{ pattern: /`(?:\\.|[^`\\])*`/g, type: "string", priority: 1 },
 
-		// regex literal (simple heuristique)
 		{
 			pattern: /(^|[=(,:;\s])\/(?!\s)(?:\\.|[^/\\\n])+\/[gimsuy]*/g,
 			type: "regex",
 			priority: 2,
 		},
 
-		// nombres
+		{ pattern: kwDeclRe, type: "keywordDecl", priority: 3 },
 		{
 			pattern:
 				/\b(?:0x[\da-fA-F]+|0b[01]+|0o[0-7]+|\d+(\.\d+)?([eE][+-]?\d+)?)\b/g,
 			type: "number",
 			priority: 3,
 		},
-
-		// keywords / boolean / null
 		{ pattern: kwRe, type: "keyword", priority: 4 },
 
-		// fonction: ident avant (
 		{
 			pattern: /\b([A-Za-z_$][\w$]*)(?=\s*\()/g,
 			type: "function",
 			priority: 5,
 		},
 
-		// bool/null (redondant mais utile si on veut un style diff)
 		{ pattern: /\b(?:true|false)\b/g, type: "boolean", priority: 6 },
 		{ pattern: /\b(?:null|undefined)\b/g, type: "null", priority: 6 },
 
-		// opérateurs / ponctuation (très simple)
 		{ pattern: /[+\-/*%=!<>|&^~?:]+/g, type: "operator", priority: 7 },
 		{ pattern: /[{}()[\].,;]/g, type: "punctuation", priority: 8 },
+
+		// JSX: composants (nom commençant par majuscule)  <MyComp>  </React.Fragment>
+		{
+			pattern: /(?<=<\/?)[A-Z][A-Za-z0-9._:\-]*/g,
+			type: "jsxTagComponent",
+			priority: 9,
+		},
+		// JSX: balises HTML (nom commençant par minuscule) <div> </span>
+		{
+			pattern: /(?<=<\/?)[a-z][A-Za-z0-9._:\-]*/g,
+			type: "jsxTag",
+			priority: 10,
+		},
+		// JSX: attributs dans un tag
+		{
+			pattern: /(?<=\s)[A-Za-z_:][A-Za-z0-9_:.\-]*(?=\s*=)/g,
+			type: "jsxAttr",
+			priority: 11,
+		},
+		// JSX: texte entre balises (simple)
+		{ pattern: /(?<=>)[^<{}\n][^<{}]*/g, type: "jsxText", priority: 12 },
+
+		{ pattern: /(?<=\.)[A-Za-z_$][\w$]*/g, type: "property", priority: 13 },
+		{
+			pattern: /(?<!\.)\b[A-Za-z_$][\w$]*\b(?!\s*\()/g,
+			type: "variable",
+			priority: 14,
+		},
 	],
 };
