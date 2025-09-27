@@ -24,8 +24,8 @@ export const darkTheme: ThemeColors = {
 	jsxText: "#d4d4d4",
 	jsxBracket: "#808080", // 👈 chevrons gris
 	// 🌈 Brackets (3 teintes)
-	bracket0: "#61AFEF", // bleu
-	bracket1: "#E5C07B", // jaune
+	bracket0: "#E5C07B", // jaune
+	bracket1: "#61AFEF", // bleu
 	bracket2: "#C678DD", // rose
 	bracketUnmatched: "#ff6b6b",
 	bracketActive: "#ffffff",

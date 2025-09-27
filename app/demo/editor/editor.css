@@ -182,10 +182,10 @@
 
 /* src/editor/editor.css — seulement 3 classes de bracket */
 .tok-bracket0 {
-	color: var(--tok-bracket0, #61afef);
+	color: var(--tok-bracket1, #e5c07b);
 }
 .tok-bracket1 {
-	color: var(--tok-bracket1, #e5c07b);
+	color: var(--tok-bracket0, #61afef);
 }
 .tok-bracket2 {
 	color: var(--tok-bracket2, #c678dd);
