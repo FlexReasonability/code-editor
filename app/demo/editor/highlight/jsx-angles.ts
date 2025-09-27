@@ -1,38 +1,48 @@
-// src/highlight/jsx-angles.ts — fixe une priorité plus haute que les variables/opérateurs
+// src/highlight/jsx-angles.ts
+// Détecte UNIQUEMENT les chevrons des balises JSX : "<", "</", ">", "/>"
 import type { Token } from "./types";
 
+const isIdent = (c: string) => /[A-Za-z0-9_$]/.test(c);
+const isTagStart = (c: string | undefined) => !!c && /[A-Za-z]/.test(c); // tag HTML ou Composant
+
+function prevNonSpace(text: string, i: number) {
+	let k = i - 1;
+	while (k >= 0 && /\s/.test(text[k])) k--;
+	return k;
+}
+
+/** Renvoie des tokens `jsxBracket` pour les chevrons qui encadrent des balises JSX. */
 export function computeJsxAngleTokens(text: string): Token[] {
-	const tokens: Token[] = [];
-	const isIdent = (c: string) => /[A-Za-z0-9_$]/.test(c);
-	const nextIsTagLetter = (i: number) => {
-		const n1 = text[i + 1];
-		if (n1 === "/") return /[A-Za-z]/.test(text[i + 2] || "");
-		return /[A-Za-z]/.test(n1 || "");
-	};
-	const prevNonSpace = (i: number) => {
-		let k = i - 1;
-		while (k >= 0 && /\s/.test(text[k])) k--;
-		return k;
-	};
-
+	const out: Token[] = [];
 	let i = 0;
-	while (i < text.length) {
-		if (text[i] === "<" && nextIsTagLetter(i)) {
-			const p = prevNonSpace(i);
-			if (p < 0 || (!isIdent(text[p]) && text[p] !== ")")) {
-				// < ou </
-				if (text[i + 1] === "/")
-					tokens.push({ start: i, end: i + 2, type: "jsxBracket", prio: 95 }),
-						(i += 2);
-				else
-					tokens.push({ start: i, end: i + 1, type: "jsxBracket", prio: 95 }),
-						(i += 1);
+	const n = text.length;
 
-				// avance jusqu'au '>' hors quotes et hors {}
-				let j = i,
-					quote: null | "'" | '"' = null,
-					brace = 0;
-				while (j < text.length) {
+	while (i < n) {
+		if (text[i] === "<") {
+			// Heuristique anti-conflit:
+			// - le char suivant est une lettre (ou "/" puis lettre)
+			// - le char non-blanc précédent n'est PAS un ident ni ")"
+			const next = text[i + 1];
+			const looksLikeTag =
+				(next === "/" && isTagStart(text[i + 2])) || isTagStart(next);
+			const p = prevNonSpace(text, i);
+			const okLeft = p < 0 || (!isIdent(text[p]) && text[p] !== ")");
+
+			if (looksLikeTag && okLeft) {
+				// Marque "<" ou "</"
+				if (next === "/") {
+					out.push({ start: i, end: i + 2, type: "jsxBracket" });
+					i += 2;
+				} else {
+					out.push({ start: i, end: i + 1, type: "jsxBracket" });
+					i += 1;
+				}
+
+				// Avance jusqu’au '>' en gérant quotes et {…}
+				let j = i;
+				let quote: null | "'" | '"' = null;
+				let brace = 0;
+				while (j < n) {
 					const ch = text[j];
 					if (quote) {
 						if (ch === quote && text[j - 1] !== "\\") quote = null;
@@ -41,20 +51,12 @@ export function computeJsxAngleTokens(text: string): Token[] {
 						else if (ch === "}") brace = Math.max(0, brace - 1);
 						else if (ch === "'" || ch === '"') quote = ch;
 						else if (ch === ">" && brace === 0) {
-							if (text[j - 1] === "/")
-								tokens.push({
-									start: j - 1,
-									end: j + 1,
-									type: "jsxBracket",
-									prio: 95,
-								});
-							else
-								tokens.push({
-									start: j,
-									end: j + 1,
-									type: "jsxBracket",
-									prio: 95,
-								});
+							// Marque ">" ou "/>"
+							if (text[j - 1] === "/") {
+								out.push({ start: j - 1, end: j + 1, type: "jsxBracket" });
+							} else {
+								out.push({ start: j, end: j + 1, type: "jsxBracket" });
+							}
 							i = j + 1;
 							break;
 						}
@@ -66,5 +68,6 @@ export function computeJsxAngleTokens(text: string): Token[] {
 		}
 		i++;
 	}
-	return tokens;
+
+	return out;
 }

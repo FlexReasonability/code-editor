@@ -1,4 +1,4 @@
-// src/editor/Editor.tsx — Ajout du mode read-only (prop + API via ref)
+// src/editor/Editor.tsx — prise en compte du caret pour le surlignage de la paire active
 import React, {
 	useEffect,
 	useMemo,
@@ -145,12 +145,12 @@ const INDENT_UNIT = "    ";
 function prevNonWhitespace(text: string, from: number) {
 	let i = from - 1;
 	while (i >= 0 && /\s/.test(text[i])) i--;
-	return i; // -1 si aucun
+	return i;
 }
 function nextNonWhitespace(text: string, from: number) {
 	let i = from;
 	while (i < text.length && /\s/.test(text[i])) i++;
-	return i; // text.length si aucun
+	return i;
 }
 
 const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
@@ -171,11 +171,17 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 	const [menu, setMenu] = useState<MenuState>(initialMenu);
 	const [isRO, setIsRO] = useState(!!readOnlyProp);
 
+	// NEW: caret position for active-pair highlight
+	const [caretPos, setCaretPos] = useState(0);
+	const updateCaret = () =>
+		setCaretPos(textareaRef.current?.selectionStart ?? 0);
+
 	if (!onChange && !isRO) {
-		throw new Error("The 'onChange' prop is required when not in read-only mode.");
+		throw new Error(
+			"The 'onChange' prop is required when not in read-only mode."
+		);
 	}
 
-	// Expose l'API impérative
 	useImperativeHandle(
 		ref,
 		() => ({
@@ -186,7 +192,6 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 		[isRO]
 	);
 
-	// Suivre les changements du prop readOnly
 	useEffect(() => {
 		setIsRO(!!readOnlyProp);
 	}, [readOnlyProp]);
@@ -200,7 +205,6 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 		[internal]
 	);
 
-	// Auto-resize + auto-scroll caret
 	const ensureCaretVisible = (extraBottom = 0) => {
 		const root = rootRef.current,
 			ta = textareaRef.current,
@@ -225,12 +229,10 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 		requestAnimationFrame(() => ensureCaretVisible(menu.open ? 200 : 0));
 	}, [internal, menu.open]);
 
-	// Fermer le menu si on passe en lecture seule
 	useEffect(() => {
 		if (isRO && menu.open) setMenu(initialMenu);
 	}, [isRO, menu.open]);
 
-	// Sync avec valeur externe
 	useEffect(() => {
 		setInternal(value);
 	}, [value]);
@@ -272,6 +274,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 			el.focus();
 			el.selectionStart = caretStart;
 			el.selectionEnd = caretEnd;
+			setCaretPos(caretStart); // NEW
 			ensureCaretVisible();
 		});
 	};
@@ -303,7 +306,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 	const closeMenu = () => setMenu(initialMenu);
 
 	const updateCompletions = (force = false) => {
-		if (isRO) return; // 🔒 désactivé en read-only
+		if (isRO) return;
 		const el = textareaRef.current;
 		if (!el) return;
 		const { selectionStart } = el;
@@ -327,13 +330,11 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 	) => {
 		const el = e.currentTarget;
 
-		// 🔒 Mode lecture seule: on ne gère aucun raccourci d'édition
 		if (isRO) {
 			if (menu.open) closeMenu();
-			return; // laisser le navigateur gérer la navigation/copie
+			return;
 		}
 
-		// Paires auto
 		if (PAIRS[e.key]) {
 			e.preventDefault();
 			const open = e.key,
@@ -351,6 +352,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 					const end = start + selected.length;
 					el.selectionStart = start;
 					el.selectionEnd = end;
+					setCaretPos(start); // NEW
 					ensureCaretVisible();
 				});
 			} else {
@@ -359,7 +361,6 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 			return;
 		}
 
-		// Saut intelligent des closers
 		if (CLOSERS.has(e.key)) {
 			const pos = el.selectionStart;
 			const nextCh = el.value[pos];
@@ -368,20 +369,19 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 				requestAnimationFrame(() => {
 					el.selectionStart = pos + 1;
 					el.selectionEnd = pos + 1;
+					setCaretPos(pos + 1); // NEW
 					ensureCaretVisible();
 				});
 				return;
 			}
 		}
 
-		// Ctrl/Cmd+Espace -> forcer l'ouverture
 		if ((e.ctrlKey || e.metaKey) && e.key === " ") {
 			e.preventDefault();
 			updateCompletions(true);
 			return;
 		}
 
-		// Menu navigation
 		if (menu.open) {
 			if (e.key === "ArrowDown") {
 				e.preventDefault();
@@ -408,6 +408,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 				requestAnimationFrame(() => {
 					el.selectionStart = newCaret;
 					el.selectionEnd = newCaret;
+					setCaretPos(newCaret); // NEW
 					ensureCaretVisible();
 				});
 				closeMenu();
@@ -420,7 +421,6 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 			}
 		}
 
-		// Indentation
 		if (e.key === "Tab") {
 			e.preventDefault();
 			const { selectionStart, selectionEnd, value } = el;
@@ -439,6 +439,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 					requestAnimationFrame(() => {
 						el.selectionStart = selectionStart + indent.length;
 						el.selectionEnd = selectionEnd + delta;
+						setCaretPos(el.selectionStart); // NEW
 						ensureCaretVisible();
 					});
 				} else {
@@ -462,6 +463,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 							startLine,
 							selectionEnd - indent.length * lines.length
 						);
+						setCaretPos(el.selectionStart); // NEW
 						ensureCaretVisible();
 					});
 				}
@@ -477,22 +479,15 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 			const value = el.value;
 			const indent = getLineIndent(value, pos);
 
-			// 🐍 Python: saut de ligne après ":" -> indente d’un niveau
 			if (isPythonLanguage(language)) {
 				const prevIdx = prevNonWhitespace(value, pos);
 				if (prevIdx >= 0 && value[prevIdx] === ":") {
 					const insert = "\n" + indent + INDENT_UNIT;
-					// Caret à la fin de l’insert (ligne correctement indentée)
 					replaceSelection(el, insert);
 					return;
 				}
 			}
 
-			// 🔧 Langages à accolades: si caret entre { ... }
-			// cas: ... {|} ...  -> devient:
-			// {
-			//   |   <-- caret ici
-			// }
 			if (isBraceLanguage(language)) {
 				const prevIdx = prevNonWhitespace(value, pos);
 				const nextIdx = nextNonWhitespace(value, pos);
@@ -501,11 +496,10 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 
 				if (prevIsOpen && nextIsClose) {
 					const before = value.slice(0, pos);
-					const after = value.slice(nextIdx + 1); // on « consomme » la fermeture existante
+					const after = value.slice(nextIdx + 1);
 					const insert = "\n" + indent + INDENT_UNIT + "\n" + indent + "}";
-
 					const nextValue = before + insert + after;
-					const caretOffset = ("\n" + indent + INDENT_UNIT).length; // position dans insert
+					const caretOffset = ("\n" + indent + INDENT_UNIT).length;
 					setInternal(nextValue);
 					onChange!(nextValue);
 
@@ -513,28 +507,32 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 						const newPos = before.length + caretOffset;
 						el.selectionStart = newPos;
 						el.selectionEnd = newPos;
+						setCaretPos(newPos); // NEW
 						ensureCaretVisible();
 					});
 					return;
 				}
 			}
 
-			// 🧭 Par défaut: conserver l’indentation courante
 			replaceSelection(el, "\n" + indent);
 			return;
 		}
 	};
 
 	const handleInput: React.ChangeEventHandler<HTMLTextAreaElement> = () => {
-		if (isRO) return; // 🔒 pas d’update ni d’auto-complétion
+		if (isRO) return;
 		const el = textareaRef.current!;
 		const ch = el.value[el.selectionStart - 1] || "";
 		if (/[A-Za-z0-9_]/.test(ch)) updateCompletions(false);
 		else if (menu.open) updateCompletions(false);
-		requestAnimationFrame(() => ensureCaretVisible(menu.open ? 200 : 0));
+		requestAnimationFrame(() => {
+			setCaretPos(el.selectionStart ?? 0); // NEW
+			ensureCaretVisible(menu.open ? 200 : 0);
+		});
 	};
 
-	const highlightedHTML = renderHighlightedHTML(internal, language);
+	// Use caretPos for active bracket pair
+	const highlightedHTML = renderHighlightedHTML(internal, language, caretPos);
 	const highlightVars = getHighlightCSSVars("vscode-dark");
 
 	return (
@@ -574,16 +572,19 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 						ref={textareaRef}
 						spellCheck={false}
 						value={internal}
-						readOnly={isRO} // 🔒 natif
+						readOnly={isRO}
 						aria-readonly={isRO || undefined}
 						onChange={(e) => {
-							// en readOnly, la value ne change pas, mais on laisse l’event pour compat
 							if (isRO) return;
 							setInternal(e.target.value);
 							onChange!(e.target.value);
 							handleInput(e);
 						}}
 						onKeyDown={handleKeyDown}
+						onKeyUp={updateCaret}
+						onSelect={updateCaret}
+						onMouseUp={updateCaret}
+						onClick={updateCaret}
 						className={`editor-textarea editor-text-transparent${
 							isRO ? " is-ro-textarea" : ""
 						}`}
@@ -624,6 +625,7 @@ const Editor = React.forwardRef<EditorHandle, EditorProps>((props, ref) => {
 										el.focus();
 										el.selectionStart = newCaret;
 										el.selectionEnd = newCaret;
+										setCaretPos(newCaret); // NEW
 										ensureCaretVisible();
 									});
 									closeMenu();

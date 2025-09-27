@@ -1,19 +1,19 @@
-// src/highlight/priority.ts — table de priorités par type
+// src/highlight/priority.ts
 import { TokenType } from "./types";
 
 export function tokenPriority(t: TokenType): number {
 	switch (t) {
-		// Très forts: on ne veut jamais les écraser
+		// Forts: ne jamais écraser
 		case "string":
 		case "comment":
 		case "regex":
 			return 100;
 
-		// Chevrons JSX
+		// Chevrons JSX gris (doivent gagner sur operator/variable)
 		case "jsxBracket":
 			return 95;
 
-		// Brackets
+		// Brackets appariés/actifs
 		case "bracketActive":
 			return 92;
 		case "bracketUnmatched":
@@ -33,7 +33,7 @@ export function tokenPriority(t: TokenType): number {
 		case "jsxText":
 			return 70;
 
-		// JS « sémantiques »
+		// JS
 		case "keywordDecl":
 			return 68;
 		case "keyword":
@@ -48,7 +48,6 @@ export function tokenPriority(t: TokenType): number {
 		case "variable":
 			return 60;
 
-		// Restes
 		case "operator":
 			return 50;
 		case "punctuation":

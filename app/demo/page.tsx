@@ -10,7 +10,7 @@ const codeExample = `import { useState } from "react";
 import Editor from "light-code-editor";
 
 const Page = () => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(null);
   
   return (
     <Editor
